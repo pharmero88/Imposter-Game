@@ -56,6 +56,9 @@
     .btn-ghost { background: transparent; color: #cbd5e1; border: 1px dashed rgba(255,255,255,0.16); }
     .btn[disabled] { opacity: .45; cursor: not-allowed; }
     .btn-block { width: 100%; }
+    .info-btn { min-height: 42px; padding: 10px 14px; border-radius: 14px; font-size: 14px; }
+    .overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.7); display: grid; align-items: end; padding: 16px 14px calc(env(safe-area-inset-bottom) + 16px); z-index: 50; }
+    .modal { max-width: 760px; width: 100%; margin: 0 auto; background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; box-shadow: var(--shadow); padding: 18px; }
     .grid { display: grid; gap: 12px; }
     .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -98,11 +101,10 @@
   <div class="app">
     <div class="topbar">
       <div class="brand">
-        <div class="logo">I</div>
+        <button class="btn btn-secondary info-btn" onclick="toggleInfo(true)">Info</button>
         <div class="title">
-          <h1>Imposter</h1>
-          <p>iPhone-Spiel für 4 bis 20 Spieler</p>
-        </div>
+          <h1>Imposter Game</h1>
+</div>
       </div>
       <div class="pill">Runde <span id="roundNo">1</span></div>
     </div>
@@ -315,6 +317,9 @@
       phase: "setup",
       round: 1,
       currentPlayer: 0,
+      turnOrder: [],
+      turnDirection: 1,
+      turnDirectionLabel: "",
       imposterIndex: null,
       secretWord: "",
       hintWord: "",
@@ -322,7 +327,8 @@
       accusedIndex: null,
       reviewIndex: null,
       outcomeText: "",
-      revealReason: ""
+      revealReason: "",
+      infoOpen: false
     };
 
     const app = document.getElementById("app");
@@ -360,6 +366,21 @@
       return "hard";
     }
 
+    function buildTurnOrder() {
+      const startIndex = Math.floor(Math.random() * state.players.length);
+      state.turnDirection = Math.random() < 0.5 ? 1 : -1;
+      state.turnDirectionLabel = state.turnDirection === 1 ? "Im Uhrzeigersinn" : "Gegen den Uhrzeigersinn";
+      state.turnOrder = [];
+      for (let step = 0; step < state.players.length; step++) {
+        state.turnOrder.push((startIndex + step * state.turnDirection + state.players.length * 10) % state.players.length);
+      }
+      state.currentPlayer = 0;
+    }
+
+    function activePlayerIndex() {
+      return state.turnOrder[state.currentPlayer] ?? 0;
+    }
+
     function nonImposterCount() {
       return state.players.length - 1;
     }
@@ -393,7 +414,7 @@
       const names = state.players.map((p, i) => ({ ...p, name: (p.name || `Spieler ${i + 1}`).trim() || `Spieler ${i + 1}` }));
       state.players = names;
       state.imposterIndex = Math.floor(Math.random() * state.players.length);
-      state.currentPlayer = 0;
+      buildTurnOrder();
       state.accusedIndex = null;
       state.reviewIndex = null;
       state.rejectors = [];
@@ -405,7 +426,7 @@
     }
 
     function nextWordSameImposter() {
-      state.currentPlayer = 0;
+      buildTurnOrder();
       state.reviewIndex = null;
       state.rejectors = [];
       state.accusedIndex = null;
@@ -453,6 +474,11 @@
 
     function setHint(enabled) {
       state.settings.imposterHint = enabled;
+      render();
+    }
+
+    function toggleInfo(open) {
+      state.infoOpen = open;
       render();
     }
 
@@ -561,7 +587,7 @@
               <div class="score-row">
                 <div>
                   <strong>${p.name}</strong>
-                  ${i === state.imposterIndex && state.phase !== 'setup' ? '<span class="tiny"> · aktueller Imposter</span>' : ''}
+                  
                 </div>
                 <div><strong>${p.score}</strong> Punkte</div>
               </div>
@@ -571,17 +597,27 @@
       `;
     }
 
-    function rulesHTML() {
+    function infoOverlayHTML() {
       return `
-        <div class="card stack">
-          <h3 class="section-title">Kurze Regeln</h3>
-          <ul class="rules small">
-            <li>Alle Spieler außer dem Imposter sehen denselben Begriff. Der Imposter sieht optional nur ein Hinweiswort.</li>
-            <li>Danach beschreibt reihum jeder den Begriff, ohne ihn direkt zu nennen.</li>
-            <li>Wird der Imposter nicht erkannt oder ein falscher Spieler verdächtigt, bekommt der Imposter 1 Punkt.</li>
-            <li>Wird der Imposter enttarnt, darf er genau einmal den gesuchten Begriff raten. Bei richtigem Tipp bekommt er 1 Punkt, sonst bekommen alle anderen je 1 Punkt.</li>
-            <li>Wenn mindestens 50% der Nicht-Imposter den Begriff ablehnen, wird automatisch ein neuer Begriff gezogen.</li>
-          </ul>
+        <div class="overlay" onclick="toggleInfo(false)">
+          <div class="modal stack" onclick="event.stopPropagation()">
+            <div class="row" style="justify-content:space-between;align-items:flex-start">
+              <div>
+                <h3 class="section-title" style="margin:2px 0 0">Info</h3>
+              </div>
+              <button class="btn btn-secondary info-btn" onclick="toggleInfo(false)">Schließen</button>
+            </div>
+            <div class="card stack">
+              <h3 class="section-title">Kurze Regeln</h3>
+              <ul class="rules small">
+                <li>Alle Spieler außer dem Imposter sehen denselben Begriff. Der Imposter sieht optional nur ein Hinweiswort.</li>
+                <li>Danach beschreibt reihum jeder den Begriff, ohne ihn direkt zu nennen.</li>
+                <li>Wird der Imposter nicht erkannt oder ein falscher Spieler verdächtigt, bekommt der Imposter 1 Punkt.</li>
+                <li>Wird der Imposter enttarnt, darf er genau einmal den gesuchten Begriff raten. Bei richtigem Tipp bekommt er 1 Punkt, sonst bekommen alle anderen je 1 Punkt.</li>
+                <li>Wenn mindestens 50% der Nicht-Imposter den Begriff ablehnen, wird automatisch ein neuer Begriff gezogen.</li>
+              </ul>
+            </div>
+          </div>
         </div>
       `;
     }
@@ -591,10 +627,10 @@
       return `
         <div class="screen stack">
           <div class="hero stack">
-            <div class="pill">Läuft direkt im iPhone-Browser</div>
+            
             <div>
-              <h2 style="margin:0 0 6px">Runde vorbereiten</h2>
-              <div class="small muted">Mehrere Kategorien auswählbar, 3 Schwierigkeitsstufen, Hinweiswort optional, Punktestand inklusive.</div>
+              <h2 style="margin:0 0 6px">Vorbereitung der Runde</h2>
+              <div class="small muted">Trage die Namen aller Mitspieler ein. Wähle anschließend Kategorie, Schwierigkeitsgrad und ob der Imposter einen Hinweis erhalten soll.</div>
             </div>
           </div>
 
@@ -656,12 +692,11 @@
                   <button class="btn ${state.settings.imposterHint ? 'btn-primary' : 'btn-secondary'}" onclick="setHint(true)">Hinweis an</button>
                   <button class="btn ${!state.settings.imposterHint ? 'btn-primary' : 'btn-secondary'}" onclick="setHint(false)">Hinweis aus</button>
                 </div>
-                <div class="tiny">Bei „leicht + Hinweis“ sind die Hinweise absichtlich nah genug am Thema, aber nicht identisch mit dem Lösungswort.</div>
+                
               </div>
             </div>
           </div>
 
-          ${rulesHTML()}
 
           ${error ? `<div class="notice">${error}</div>` : ''}
           <button class="btn btn-primary btn-block" ${error ? 'disabled' : ''} onclick="startRound(true)">Spiel starten</button>
@@ -740,10 +775,8 @@
       return `
         <div class="screen stack">
           ${scoreboardHTML()}
-          <div class="hero stack">
-            <div class="tiny">Diskussionsphase</div>
-            <h2 style="margin:0">Jetzt beschreibt jeder seinen Begriff</h2>
-            <div class="small muted">Nennt das Wort nicht direkt. Der Imposter muss mitraten und unauffällig bleiben.</div>
+          <div class="hero stack center">
+            <div class="small" style="font-size:32px; line-height:1.2; font-weight:800; color:#fdba74;">Das Spiel beginnt bei ${playerName(state.turnOrder[0] ?? 0)} ${state.turnDirection === 1 ? 'im' : 'gegen den'} Uhrzeigersinn.</div>
           </div>
 
           <div class="grid two">
@@ -760,8 +793,6 @@
               <button class="btn btn-secondary btn-block" onclick="state.phase='review-select'; render();">Zurückfunktion öffnen</button>
             </div>
           </div>
-
-          ${rulesHTML()}
 
           <div class="footer-actions">
             <button class="btn btn-primary btn-block" onclick="state.phase='accuse'; render();">Imposter bestimmen</button>
@@ -891,7 +922,7 @@
         case 'result': html = resultScreen(); break;
         default: html = setupScreen();
       }
-      app.innerHTML = html;
+      app.innerHTML = html + (state.infoOpen ? infoOverlayHTML() : '');
     }
 
     render();
