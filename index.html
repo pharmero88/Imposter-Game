@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Imposter iPhone Spiel</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --card: #ffffff;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --dark: #0b1020;
+      --accent: #14b8a6;
+      --accent-2: #22c55e;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --soft: #e2e8f0;
+      --shadow: 0 10px 30px rgba(0,0,0,0.28);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(180deg, #0f172a 0%, #111827 100%); color: var(--text); min-height: 100%; }
+    body { padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px; }
+    .app { max-width: 760px; margin: 0 auto; padding: 10px 0 30px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .logo { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #14b8a6, #0ea5e9); display: grid; place-items: center; font-weight: 900; color: white; box-shadow: var(--shadow); }
+    .title h1 { margin: 0; font-size: 24px; line-height: 1.1; }
+    .title p { margin: 3px 0 0; color: var(--muted); font-size: 14px; }
+    .screen, .panel { background: rgba(17, 24, 39, 0.94); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; box-shadow: var(--shadow); }
+    .screen { padding: 16px; }
+    .panel { padding: 14px; }
+    .stack { display: grid; gap: 12px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .row.stretch > * { flex: 1 1 180px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+    .tiny { font-size: 12px; color: var(--muted); }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(20,184,166,0.12); border: 1px solid rgba(20,184,166,0.35); color: #a7f3d0; font-size: 13px; }
+    .badge { display: inline-block; padding: 7px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; }
+    .easy { background: rgba(34,197,94,0.18); color: #bbf7d0; border: 1px solid rgba(34,197,94,0.35); }
+    .medium { background: rgba(245,158,11,0.18); color: #fde68a; border: 1px solid rgba(245,158,11,0.35); }
+    .hard { background: rgba(239,68,68,0.18); color: #fecaca; border: 1px solid rgba(239,68,68,0.35); }
+    .btn { appearance: none; border: none; border-radius: 16px; padding: 14px 16px; min-height: 48px; font-size: 16px; font-weight: 700; line-height: 1.2; cursor: pointer; transition: transform .12s ease, opacity .12s ease, background .12s ease; }
+    .btn:active { transform: scale(0.985); }
+    .btn-primary { background: linear-gradient(135deg, #14b8a6, #06b6d4); color: white; }
+    .btn-secondary { background: #1f2937; color: #e5e7eb; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-danger { background: #7f1d1d; color: #fee2e2; border: 1px solid rgba(248,113,113,0.3); }
+    .btn-warn { background: #78350f; color: #fde68a; border: 1px solid rgba(245,158,11,0.3); }
+    .btn-success { background: #14532d; color: #dcfce7; border: 1px solid rgba(34,197,94,0.3); }
+    .btn-ghost { background: transparent; color: #cbd5e1; border: 1px dashed rgba(255,255,255,0.16); }
+    .btn[disabled] { opacity: .45; cursor: not-allowed; }
+    .btn-block { width: 100%; }
+    .grid { display: grid; gap: 12px; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 14px; }
+    .card.white { background: #f8fafc; color: #0f172a; }
+    .card.white .muted { color: #475569; }
+    .section-title { margin: 0 0 6px; font-size: 18px; }
+    .list { display: grid; gap: 8px; }
+    .player-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    input[type="text"] { width: 100%; min-height: 48px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color: white; padding: 12px 14px; font-size: 16px; }
+    input[type="text"]::placeholder { color: #94a3b8; }
+    .toggle, .option { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
+    .option.active { border-color: rgba(20,184,166,0.55); background: rgba(20,184,166,0.12); }
+    .checkbox-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .check { display: flex; gap: 10px; align-items: start; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .check input, .radio input { transform: scale(1.2); margin-top: 3px; }
+    .radio-group { display: grid; gap: 10px; }
+    .scoreboard { display: grid; gap: 8px; }
+    .score-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,0.04); }
+    .hero { padding: 18px; border-radius: 22px; background: linear-gradient(135deg, rgba(20,184,166,0.18), rgba(14,165,233,0.16)); border: 1px solid rgba(56,189,248,0.18); }
+    .secret { font-size: 34px; line-height: 1.1; margin: 4px 0 2px; word-break: break-word; }
+    .center { text-align: center; }
+    .divider { height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0; }
+    .footer-actions { display: grid; gap: 10px; }
+    .highlight { color: #a7f3d0; }
+    .danger-text { color: #fecaca; }
+    .success-text { color: #bbf7d0; }
+    .notice { padding: 12px 14px; border-radius: 16px; background: rgba(245,158,11,0.12); color: #fde68a; border: 1px solid rgba(245,158,11,0.28); }
+    .rules { display: grid; gap: 8px; padding-left: 18px; margin: 0; }
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .help { background: rgba(255,255,255,0.03); padding: 12px 14px; border-radius: 14px; }
+    @media (max-width: 640px) {
+      .two, .three, .checkbox-grid { grid-template-columns: 1fr; }
+      .secret { font-size: 30px; }
+      .title h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">I</div>
+        <div class="title">
+          <h1>Imposter</h1>
+          <p>iPhone-Spiel für 4 bis 20 Spieler</p>
+        </div>
+      </div>
+      <div class="pill">Runde <span id="roundNo">1</span></div>
+    </div>
+    <div id="app"></div>
+  </div>
+
+  <script>
+    const WORDS = {
+      "Natur": {
+        leicht: [
+          { term: "Wald", hint: "Bäume" },
+          { term: "Blume", hint: "Garten" },
+          { term: "Fluss", hint: "Wasser" },
+          { term: "Berg", hint: "Gipfel" },
+          { term: "Regen", hint: "Wolken" },
+          { term: "Sonne", hint: "Himmel" },
+          { term: "Strand", hint: "Meer" },
+          { term: "Wiese", hint: "Gras" },
+          { term: "See", hint: "Ufer" },
+          { term: "Schnee", hint: "Winter" }
+        ],
+        mittel: [
+          { term: "Vulkan", hint: "Lava" },
+          { term: "Koralle", hint: "Riff" },
+          { term: "Moor", hint: "Sumpf" },
+          { term: "Lawine", hint: "Hang" },
+          { term: "Gletscher", hint: "Eis" },
+          { term: "Wasserfall", hint: "Stufe" },
+          { term: "Taifun", hint: "Sturm" },
+          { term: "Kieselstein", hint: "Ufer" },
+          { term: "Donner", hint: "Gewitter" },
+          { term: "Düne", hint: "Sand" }
+        ],
+        schwer: [
+          { term: "Gezeitenzone", hint: "Küste" },
+          { term: "Tropfsteinhöhle", hint: "Kalk" },
+          { term: "Nebelwald", hint: "Feuchtigkeit" },
+          { term: "Tundra", hint: "Kälte" },
+          { term: "Mangrovenwald", hint: "Salzwasser" },
+          { term: "Karstlandschaft", hint: "Fels" },
+          { term: "Permafrost", hint: "Boden" },
+          { term: "Auenlandschaft", hint: "Fluss" },
+          { term: "Delta", hint: "Mündung" },
+          { term: "Monsun", hint: "Jahreszeit" }
+        ]
+      },
+      "Technik": {
+        leicht: [
+          { term: "Handy", hint: "Anruf" },
+          { term: "Laptop", hint: "Tastatur" },
+          { term: "Kopfhörer", hint: "Musik" },
+          { term: "Fernbedienung", hint: "Sofa" },
+          { term: "Maus", hint: "Computer" },
+          { term: "Drucker", hint: "Papier" },
+          { term: "Kamera", hint: "Foto" },
+          { term: "Monitor", hint: "Bildschirm" },
+          { term: "Ladekabel", hint: "Akku" },
+          { term: "Bluetooth", hint: "Verbinden" }
+        ],
+        mittel: [
+          { term: "Router", hint: "WLAN" },
+          { term: "Mikrofon", hint: "Stimme" },
+          { term: "Sensor", hint: "Messen" },
+          { term: "Algorithmus", hint: "Logik" },
+          { term: "Drohne", hint: "Flug" },
+          { term: "Scanner", hint: "Dokument" },
+          { term: "Festplatte", hint: "Speicher" },
+          { term: "Touchscreen", hint: "Finger" },
+          { term: "Smartwatch", hint: "Handgelenk" },
+          { term: "Passwort", hint: "Zugang" }
+        ],
+        schwer: [
+          { term: "Mikroprozessor", hint: "Chip" },
+          { term: "Quantencomputer", hint: "Bits" },
+          { term: "Beschleunigungssensor", hint: "Bewegung" },
+          { term: "Laserscanner", hint: "Abtasten" },
+          { term: "Verschlüsselung", hint: "Sicherheit" },
+          { term: "Spracherkennung", hint: "Befehl" },
+          { term: "Leiterplatte", hint: "Elektronik" },
+          { term: "Satellitennavigation", hint: "Position" },
+          { term: "Wärmebildkamera", hint: "Temperatur" },
+          { term: "Frequenzumrichter", hint: "Motor" }
+        ]
+      },
+      "Essen & Trinken": {
+        leicht: [
+          { term: "Pizza", hint: "Ofen" },
+          { term: "Apfel", hint: "Obst" },
+          { term: "Kaffee", hint: "Tasse" },
+          { term: "Schokolade", hint: "Süß" },
+          { term: "Nudeln", hint: "Topf" },
+          { term: "Brot", hint: "Bäckerei" },
+          { term: "Käse", hint: "Scheibe" },
+          { term: "Tee", hint: "Beutel" },
+          { term: "Suppe", hint: "Löffel" },
+          { term: "Eis", hint: "Sommer" }
+        ],
+        mittel: [
+          { term: "Lasagne", hint: "Schichten" },
+          { term: "Croissant", hint: "Butter" },
+          { term: "Risotto", hint: "Reis" },
+          { term: "Hummus", hint: "Kichererbse" },
+          { term: "Espresso", hint: "stark" },
+          { term: "Lachsfilet", hint: "Pfanne" },
+          { term: "Cheesecake", hint: "Dessert" },
+          { term: "Smoothie", hint: "Mixer" },
+          { term: "Gnocchi", hint: "Kartoffel" },
+          { term: "Sushi", hint: "Reis" }
+        ],
+        schwer: [
+          { term: "Crème brûlée", hint: "Karamell" },
+          { term: "Bouillabaisse", hint: "Fisch" },
+          { term: "Tahinidressing", hint: "Sesam" },
+          { term: "Kimchi", hint: "Fermentiert" },
+          { term: "Minestrone", hint: "Gemüse" },
+          { term: "Trüffelöl", hint: "Aroma" },
+          { term: "Ceviche", hint: "Limette" },
+          { term: "Polenta", hint: "Mais" },
+          { term: "Panna cotta", hint: "Sahne" },
+          { term: "Matcha", hint: "Pulver" }
+        ]
+      },
+      "Alltag": {
+        leicht: [
+          { term: "Zahnbürste", hint: "Bad" },
+          { term: "Schlüssel", hint: "Tür" },
+          { term: "Rucksack", hint: "tragen" },
+          { term: "Socken", hint: "Schuhe" },
+          { term: "Kissen", hint: "Bett" },
+          { term: "Lampe", hint: "Licht" },
+          { term: "Regenschirm", hint: "nass" },
+          { term: "Spiegel", hint: "Gesicht" },
+          { term: "Mülleimer", hint: "Küche" },
+          { term: "Wecker", hint: "morgen" }
+        ],
+        mittel: [
+          { term: "Wäschekorb", hint: "Kleidung" },
+          { term: "Staubsauger", hint: "Boden" },
+          { term: "Brotdose", hint: "Pause" },
+          { term: "Türklinke", hint: "drücken" },
+          { term: "Einkaufswagen", hint: "Supermarkt" },
+          { term: "Wasserkocher", hint: "heiß" },
+          { term: "Kleiderbügel", hint: "Schrank" },
+          { term: "Notizblock", hint: "aufschreiben" },
+          { term: "Steckdose", hint: "Strom" },
+          { term: "Sonnencreme", hint: "Urlaub" }
+        ],
+        schwer: [
+          { term: "Flusensieb", hint: "Waschmaschine" },
+          { term: "Fugenkratzer", hint: "Reinigung" },
+          { term: "Kabelbinder", hint: "ordnen" },
+          { term: "Abtropfgitter", hint: "Spüle" },
+          { term: "Dosenöffner", hint: "Küche" },
+          { term: "Fensterdichtung", hint: "Zugluft" },
+          { term: "Heizungsventil", hint: "warm" },
+          { term: "Matratzenschoner", hint: "Bett" },
+          { term: "Teigschaber", hint: "Backen" },
+          { term: "Wischbezug", hint: "Boden" }
+        ]
+      },
+      "Orte & Reisen": {
+        leicht: [
+          { term: "Flughafen", hint: "Koffer" },
+          { term: "Hotel", hint: "Zimmer" },
+          { term: "Bahnhof", hint: "Zug" },
+          { term: "Brücke", hint: "Fluss" },
+          { term: "Museum", hint: "Ausstellung" },
+          { term: "Insel", hint: "Meer" },
+          { term: "Campingplatz", hint: "Zelt" },
+          { term: "Restaurant", hint: "Speisekarte" },
+          { term: "Marktplatz", hint: "Stadt" },
+          { term: "Tunnel", hint: "durchfahren" }
+        ],
+        mittel: [
+          { term: "Leuchtturm", hint: "Küste" },
+          { term: "Burg", hint: "Mauer" },
+          { term: "Passstraße", hint: "Kurven" },
+          { term: "Altstadt", hint: "Gassen" },
+          { term: "Aussichtsplattform", hint: "Blick" },
+          { term: "Fähre", hint: "Überfahrt" },
+          { term: "Skigebiet", hint: "Piste" },
+          { term: "Nationalpark", hint: "Schutzgebiet" },
+          { term: "Raststätte", hint: "Autobahn" },
+          { term: "Hafen", hint: "Schiffe" }
+        ],
+        schwer: [
+          { term: "Grenzübergang", hint: "Kontrolle" },
+          { term: "Aussichtsgrat", hint: "Kamm" },
+          { term: "Seilbahnstation", hint: "Berg" },
+          { term: "Klosteranlage", hint: "Innenhof" },
+          { term: "Bergpass", hint: "Höhe" },
+          { term: "Lagune", hint: "Wasser" },
+          { term: "Promenade", hint: "Ufer" },
+          { term: "Panoramaroute", hint: "Landschaft" },
+          { term: "Altstadtring", hint: "Verkehr" },
+          { term: "Kurort", hint: "Erholung" }
+        ]
+      }
+    };
+
+    const defaultPlayers = ["Spieler 1", "Spieler 2", "Spieler 3", "Spieler 4"];
+
+    const state = {
+      players: defaultPlayers.map(name => ({ name, score: 0 })),
+      settings: {
+        categories: Object.keys(WORDS).slice(0, 2),
+        difficulty: "mittel",
+        imposterHint: true
+      },
+      phase: "setup",
+      round: 1,
+      currentPlayer: 0,
+      imposterIndex: null,
+      secretWord: "",
+      hintWord: "",
+      rejectors: [],
+      accusedIndex: null,
+      reviewIndex: null,
+      outcomeText: "",
+      revealReason: ""
+    };
+
+    const app = document.getElementById("app");
+    const roundNo = document.getElementById("roundNo");
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function normalize(text) {
+      return (text || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/ß/g, "ss")
+        .replace(/[^a-z0-9 ]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function difficultyLabel(value) {
+      if (value === "leicht") return "Leicht";
+      if (value === "mittel") return "Mittel";
+      return "Schwer";
+    }
+
+    function difficultyClass(value) {
+      if (value === "leicht") return "easy";
+      if (value === "mittel") return "medium";
+      return "hard";
+    }
+
+    function nonImposterCount() {
+      return state.players.length - 1;
+    }
+
+    function rejectThreshold() {
+      return Math.ceil(nonImposterCount() / 2);
+    }
+
+    function buildPool() {
+      const selected = state.settings.categories;
+      const diff = state.settings.difficulty;
+      let pool = [];
+      selected.forEach(category => {
+        pool = pool.concat((WORDS[category] && WORDS[category][diff]) || []);
+      });
+      return pool;
+    }
+
+    function pickRoundWord() {
+      const pool = buildPool();
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      state.secretWord = pick.term;
+      state.hintWord = pick.hint;
+    }
+
+    function startRound(resetScores = false) {
+      if (resetScores) {
+        state.players.forEach(p => p.score = 0);
+        state.round = 1;
+      }
+      const names = state.players.map((p, i) => ({ ...p, name: (p.name || `Spieler ${i + 1}`).trim() || `Spieler ${i + 1}` }));
+      state.players = names;
+      state.imposterIndex = Math.floor(Math.random() * state.players.length);
+      state.currentPlayer = 0;
+      state.accusedIndex = null;
+      state.reviewIndex = null;
+      state.rejectors = [];
+      state.outcomeText = "";
+      state.revealReason = "";
+      pickRoundWord();
+      state.phase = "pass";
+      render();
+    }
+
+    function nextWordSameImposter() {
+      state.currentPlayer = 0;
+      state.reviewIndex = null;
+      state.rejectors = [];
+      state.accusedIndex = null;
+      state.outcomeText = "";
+      state.revealReason = "Mehrheit hat den Begriff abgelehnt – neuer Begriff für alle.";
+      pickRoundWord();
+      state.phase = "new-word";
+      render();
+    }
+
+    function startNextRoundKeepSetup() {
+      state.round += 1;
+      startRound(false);
+    }
+
+    function updatePlayerCount(delta) {
+      const next = state.players.length + delta;
+      if (next < 4 || next > 20) return;
+      if (delta > 0) {
+        state.players.push({ name: `Spieler ${next}`, score: 0 });
+      } else {
+        state.players.pop();
+      }
+      render();
+    }
+
+    function setPlayerName(index, value) {
+      state.players[index].name = value;
+    }
+
+    function toggleCategory(category) {
+      const has = state.settings.categories.includes(category);
+      if (has) {
+        state.settings.categories = state.settings.categories.filter(c => c !== category);
+      } else {
+        state.settings.categories = [...state.settings.categories, category];
+      }
+      render();
+    }
+
+    function setDifficulty(value) {
+      state.settings.difficulty = value;
+      render();
+    }
+
+    function setHint(enabled) {
+      state.settings.imposterHint = enabled;
+      render();
+    }
+
+    function validateSetup() {
+      if (state.players.length < 4 || state.players.length > 20) {
+        return "Bitte 4 bis 20 Spieler anlegen.";
+      }
+      if (state.settings.categories.length === 0) {
+        return "Bitte mindestens eine Kategorie auswählen.";
+      }
+      const pool = buildPool();
+      if (!pool.length) {
+        return "Für die gewählte Kombination wurden keine Begriffe gefunden.";
+      }
+      return "";
+    }
+
+    function giveReject(index) {
+      if (index === state.imposterIndex) return;
+      if (!state.rejectors.includes(index)) state.rejectors.push(index);
+      render();
+    }
+
+    function proceedAfterReveal() {
+      if (state.currentPlayer < state.players.length - 1) {
+        state.currentPlayer += 1;
+        state.phase = "pass";
+      } else {
+        if (state.rejectors.length >= rejectThreshold()) {
+          nextWordSameImposter();
+          return;
+        }
+        state.phase = "discussion";
+      }
+      render();
+    }
+
+    function accusePlayer(index) {
+      state.accusedIndex = index;
+      render();
+    }
+
+    function finishAccusation() {
+      if (state.accusedIndex === null) return;
+      if (state.accusedIndex !== state.imposterIndex) {
+        state.players[state.imposterIndex].score += 1;
+        state.outcomeText = `${state.players[state.accusedIndex].name} wurde verdächtigt, aber der Imposter war ${state.players[state.imposterIndex].name}. Der Imposter bekommt 1 Punkt.`;
+        state.phase = "result";
+      } else {
+        state.phase = "guess";
+      }
+      render();
+    }
+
+    function submitGuess() {
+      const input = document.getElementById("guessInput");
+      const guess = normalize(input.value);
+      const solution = normalize(state.secretWord);
+      if (!guess) return;
+      if (guess === solution) {
+        state.players[state.imposterIndex].score += 1;
+        state.outcomeText = `Der Imposter ${state.players[state.imposterIndex].name} wurde enttarnt, hat aber den Begriff korrekt erraten und bekommt 1 Punkt.`;
+      } else {
+        state.players.forEach((p, i) => {
+          if (i !== state.imposterIndex) p.score += 1;
+        });
+        state.outcomeText = `Der Imposter ${state.players[state.imposterIndex].name} wurde enttarnt und hat falsch geraten. Alle anderen Spieler erhalten je 1 Punkt.`;
+      }
+      state.phase = "result";
+      render();
+    }
+
+    function roleTextForPlayer(index) {
+      if (index === state.imposterIndex) {
+        return {
+          title: "Du bist der IMPOSTER",
+          body: state.settings.imposterHint ? state.hintWord : "Kein Hinweis aktiviert",
+          label: state.settings.imposterHint ? "Hinweis" : "Info",
+          tone: "danger"
+        };
+      }
+      return {
+        title: "Dein Begriff",
+        body: state.secretWord,
+        label: "Wort",
+        tone: "normal"
+      };
+    }
+
+    function playerName(index) {
+      return state.players[index]?.name || `Spieler ${index + 1}`;
+    }
+
+    function scoreboardHTML() {
+      return `
+        <div class="panel stack">
+          <div class="row" style="justify-content:space-between;align-items:flex-end">
+            <div>
+              <div class="tiny">Punktestand</div>
+              <h3 class="section-title" style="margin:2px 0 0">Aktuelle Runde</h3>
+            </div>
+            <div class="badge ${difficultyClass(state.settings.difficulty)}">${difficultyLabel(state.settings.difficulty)}</div>
+          </div>
+          <div class="scoreboard">
+            ${state.players.map((p, i) => `
+              <div class="score-row">
+                <div>
+                  <strong>${p.name}</strong>
+                  ${i === state.imposterIndex && state.phase !== 'setup' ? '<span class="tiny"> · aktueller Imposter</span>' : ''}
+                </div>
+                <div><strong>${p.score}</strong> Punkte</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function rulesHTML() {
+      return `
+        <div class="card stack">
+          <h3 class="section-title">Kurze Regeln</h3>
+          <ul class="rules small">
+            <li>Alle Spieler außer dem Imposter sehen denselben Begriff. Der Imposter sieht optional nur ein Hinweiswort.</li>
+            <li>Danach beschreibt reihum jeder den Begriff, ohne ihn direkt zu nennen.</li>
+            <li>Wird der Imposter nicht erkannt oder ein falscher Spieler verdächtigt, bekommt der Imposter 1 Punkt.</li>
+            <li>Wird der Imposter enttarnt, darf er genau einmal den gesuchten Begriff raten. Bei richtigem Tipp bekommt er 1 Punkt, sonst bekommen alle anderen je 1 Punkt.</li>
+            <li>Wenn mindestens 50% der Nicht-Imposter den Begriff ablehnen, wird automatisch ein neuer Begriff gezogen.</li>
+          </ul>
+        </div>
+      `;
+    }
+
+    function setupScreen() {
+      const error = validateSetup();
+      return `
+        <div class="screen stack">
+          <div class="hero stack">
+            <div class="pill">Läuft direkt im iPhone-Browser</div>
+            <div>
+              <h2 style="margin:0 0 6px">Runde vorbereiten</h2>
+              <div class="small muted">Mehrere Kategorien auswählbar, 3 Schwierigkeitsstufen, Hinweiswort optional, Punktestand inklusive.</div>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="card stack">
+              <div class="row" style="justify-content:space-between">
+                <h3 class="section-title">Spieler</h3>
+                <div class="row">
+                  <button class="btn btn-secondary" onclick="updatePlayerCount(-1)">−</button>
+                  <span>${state.players.length}</span>
+                  <button class="btn btn-secondary" onclick="updatePlayerCount(1)">+</button>
+                </div>
+              </div>
+              <div class="list">
+                ${state.players.map((p, i) => `
+                  <div class="player-row">
+                    <input type="text" value="${escapeHtml(p.name)}" placeholder="Spieler ${i + 1}" oninput="setPlayerName(${i}, this.value)">
+                    <div class="pill">${p.score} P</div>
+                  </div>
+                `).join("")}
+              </div>
+              <div class="tiny">Erlaubt sind 4 bis 20 Spieler.</div>
+            </div>
+
+            <div class="stack">
+              <div class="card stack">
+                <h3 class="section-title">Kategorien</h3>
+                <div class="checkbox-grid">
+                  ${Object.keys(WORDS).map(category => `
+                    <label class="check">
+                      <input type="checkbox" ${state.settings.categories.includes(category) ? 'checked' : ''} onchange="toggleCategory('${category.replace(/'/g, "\\'")}')">
+                      <span>
+                        <strong>${category}</strong><br>
+                        <span class="tiny">30 Begriffe pro Kategorie</span>
+                      </span>
+                    </label>
+                  `).join("")}
+                </div>
+                <div class="chip-wrap">
+                  ${state.settings.categories.map(c => `<span class="badge medium">${c}</span>`).join("") || '<span class="tiny">Noch keine Kategorie gewählt.</span>'}
+                </div>
+              </div>
+
+              <div class="card stack">
+                <h3 class="section-title">Schwierigkeit</h3>
+                <div class="radio-group">
+                  ${['leicht', 'mittel', 'schwer'].map(diff => `
+                    <label class="option ${state.settings.difficulty === diff ? 'active' : ''}">
+                      <input type="radio" name="difficulty" ${state.settings.difficulty === diff ? 'checked' : ''} onchange="setDifficulty('${diff}')">
+                      <span><strong>${difficultyLabel(diff)}</strong><br><span class="tiny">${diff === 'leicht' ? 'Leichte Begriffe' : diff === 'mittel' ? 'Mittelschwere Begriffe' : 'Schwer zu erratende Begriffe'}</span></span>
+                    </label>
+                  `).join("")}
+                </div>
+              </div>
+
+              <div class="card stack">
+                <h3 class="section-title">Imposter-Hinweis</h3>
+                <div class="row stretch">
+                  <button class="btn ${state.settings.imposterHint ? 'btn-primary' : 'btn-secondary'}" onclick="setHint(true)">Hinweis an</button>
+                  <button class="btn ${!state.settings.imposterHint ? 'btn-primary' : 'btn-secondary'}" onclick="setHint(false)">Hinweis aus</button>
+                </div>
+                <div class="tiny">Bei „leicht + Hinweis“ sind die Hinweise absichtlich nah genug am Thema, aber nicht identisch mit dem Lösungswort.</div>
+              </div>
+            </div>
+          </div>
+
+          ${rulesHTML()}
+
+          ${error ? `<div class="notice">${error}</div>` : ''}
+          <button class="btn btn-primary btn-block" ${error ? 'disabled' : ''} onclick="startRound(true)">Spiel starten</button>
+        </div>
+      `;
+    }
+
+    function passScreen() {
+      return `
+        <div class="screen stack center">
+          ${scoreboardHTML()}
+          <div class="hero stack">
+            <div class="tiny">Handy weitergeben</div>
+            <h2 style="margin:0">${playerName(state.currentPlayer)} ist dran</h2>
+            <div class="muted">Nur diese Person sollte jetzt auf den Bildschirm schauen.</div>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="state.phase='reveal'; render();">Rolle anzeigen</button>
+          <button class="btn btn-secondary btn-block" onclick="state.phase='setup'; render();">Zurück zum Setup</button>
+        </div>
+      `;
+    }
+
+    function revealScreen(index, isReview = false) {
+      const role = roleTextForPlayer(index);
+      const isImposter = index === state.imposterIndex;
+      const hasRejected = state.rejectors.includes(index);
+      return `
+        <div class="screen stack center">
+          ${!isReview ? scoreboardHTML() : ''}
+          <div class="card white stack">
+            <div class="tiny">${isReview ? 'Erneute Ansicht' : 'Private Ansicht'} für ${playerName(index)}</div>
+            <h2 style="margin:0">${role.title}</h2>
+            <div class="tiny">${role.label}</div>
+            <div class="secret ${role.tone === 'danger' ? 'danger-text' : ''}">${escapeHtml(role.body)}</div>
+            <div class="muted small">${isImposter ? (state.settings.imposterHint ? 'Nutze den Hinweis, um unauffällig mitzuspielen.' : 'Du musst den Begriff aus den Aussagen der anderen erschließen.') : 'Merke dir den Begriff gut. Bei Bedarf kannst du ihn später über die Zurückfunktion nochmal ansehen.'}</div>
+          </div>
+
+          ${!isReview && !isImposter ? `
+            <div class="card stack" style="text-align:left">
+              <div class="row" style="justify-content:space-between">
+                <strong>Begriff ablehnen</strong>
+                <span class="tiny">${state.rejectors.length}/${rejectThreshold()} nötig</span>
+              </div>
+              <div class="small muted">Wenn mindestens 50% der Nicht-Imposter ablehnen, wird ein neuer Begriff gezogen und allen erneut gezeigt.</div>
+              <button class="btn ${hasRejected ? 'btn-success' : 'btn-warn'} btn-block" onclick="giveReject(${index})" ${hasRejected ? 'disabled' : ''}>${hasRejected ? 'Begriff bereits abgelehnt' : 'Begriff rejecten'}</button>
+            </div>
+          ` : ''}
+
+          <div class="footer-actions">
+            ${isReview ? `
+              <button class="btn btn-secondary btn-block" onclick="state.phase='discussion'; render();">Zurück</button>
+            ` : `
+              <button class="btn btn-secondary btn-block" onclick="state.phase='pass'; render();">Nochmal verdecken</button>
+              <button class="btn btn-primary btn-block" onclick="proceedAfterReveal()">Verbergen & Weiter</button>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    function newWordScreen() {
+      return `
+        <div class="screen stack center">
+          ${scoreboardHTML()}
+          <div class="notice">${state.revealReason}</div>
+          <div class="hero stack">
+            <h2 style="margin:0">Neuer Begriff gewählt</h2>
+            <div class="muted">Der Imposter bleibt derselbe. Alle Spieler sehen nun die neue Runde noch einmal an.</div>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="state.phase='pass'; render();">Neue Verteilrunde starten</button>
+        </div>
+      `;
+    }
+
+    function discussionScreen() {
+      return `
+        <div class="screen stack">
+          ${scoreboardHTML()}
+          <div class="hero stack">
+            <div class="tiny">Diskussionsphase</div>
+            <h2 style="margin:0">Jetzt beschreibt jeder seinen Begriff</h2>
+            <div class="small muted">Nennt das Wort nicht direkt. Der Imposter muss mitraten und unauffällig bleiben.</div>
+          </div>
+
+          <div class="grid two">
+            <div class="card stack">
+              <h3 class="section-title">Rundeninfo</h3>
+              <div class="row" style="justify-content:space-between"><span>Nicht-Imposter</span><strong>${nonImposterCount()}</strong></div>
+              <div class="row" style="justify-content:space-between"><span>Reject-Schwelle</span><strong>${rejectThreshold()}</strong></div>
+              <div class="row" style="justify-content:space-between"><span>Ablehnungen</span><strong>${state.rejectors.length}</strong></div>
+              <div class="row" style="justify-content:space-between"><span>Hinweis aktiv</span><strong>${state.settings.imposterHint ? 'Ja' : 'Nein'}</strong></div>
+            </div>
+            <div class="card stack">
+              <h3 class="section-title">Begriff vergessen?</h3>
+              <div class="small muted">Über die Zurückfunktion kann jeder Spieler seinen Begriff oder Hinweis privat erneut ansehen.</div>
+              <button class="btn btn-secondary btn-block" onclick="state.phase='review-select'; render();">Zurückfunktion öffnen</button>
+            </div>
+          </div>
+
+          ${rulesHTML()}
+
+          <div class="footer-actions">
+            <button class="btn btn-primary btn-block" onclick="state.phase='accuse'; render();">Imposter bestimmen</button>
+            <button class="btn btn-secondary btn-block" onclick="startNextRoundKeepSetup()">Neue Runde ohne Wertung starten</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function reviewSelectScreen() {
+      return `
+        <div class="screen stack">
+          ${scoreboardHTML()}
+          <div class="hero stack center">
+            <h2 style="margin:0">Zurückfunktion</h2>
+            <div class="small muted">Wähle den Spieler aus, der seinen Begriff oder Hinweis nochmals sehen soll. Danach das iPhone direkt weitergeben.</div>
+          </div>
+          <div class="list">
+            ${state.players.map((p, i) => `
+              <button class="btn btn-secondary btn-block" onclick="state.reviewIndex=${i}; state.phase='review-pass'; render();">${p.name}</button>
+            `).join('')}
+          </div>
+          <button class="btn btn-secondary btn-block" onclick="state.phase='discussion'; render();">Zurück zur Diskussion</button>
+        </div>
+      `;
+    }
+
+    function reviewPassScreen() {
+      return `
+        <div class="screen stack center">
+          ${scoreboardHTML()}
+          <div class="hero stack">
+            <div class="tiny">Private Zurückfunktion</div>
+            <h2 style="margin:0">Bitte an ${playerName(state.reviewIndex)} weitergeben</h2>
+            <div class="small muted">Nur diese Person schaut jetzt auf das Display.</div>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="state.phase='review-reveal'; render();">Begriff/Hinweis anzeigen</button>
+          <button class="btn btn-secondary btn-block" onclick="state.phase='review-select'; render();">Zurück</button>
+        </div>
+      `;
+    }
+
+    function accuseScreen() {
+      return `
+        <div class="screen stack">
+          ${scoreboardHTML()}
+          <div class="hero stack center">
+            <div class="tiny">Abstimmung</div>
+            <h2 style="margin:0">Wen verdächtigt ihr?</h2>
+            <div class="small muted">Wählt den Spieler aus, der eurer Meinung nach der Imposter ist.</div>
+          </div>
+          <div class="list">
+            ${state.players.map((p, i) => `
+              <button class="btn ${state.accusedIndex === i ? 'btn-primary' : 'btn-secondary'} btn-block" onclick="accusePlayer(${i})">${p.name}</button>
+            `).join('')}
+          </div>
+          <div class="footer-actions">
+            <button class="btn btn-primary btn-block" ${state.accusedIndex === null ? 'disabled' : ''} onclick="finishAccusation()">Verdacht bestätigen</button>
+            <button class="btn btn-secondary btn-block" onclick="state.phase='discussion'; render();">Zurück</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function guessScreen() {
+      return `
+        <div class="screen stack">
+          ${scoreboardHTML()}
+          <div class="hero stack center">
+            <div class="tiny">Letzte Chance des Imposters</div>
+            <h2 style="margin:0">${playerName(state.imposterIndex)} wurde enttarnt</h2>
+            <div class="small muted">Der Imposter darf nun einmalig den gesuchten Begriff raten.</div>
+          </div>
+          <div class="card stack">
+            <label for="guessInput"><strong>Begriff raten</strong></label>
+            <input id="guessInput" type="text" placeholder="Begriff eingeben">
+            <div class="tiny">Nur ein Versuch. Bei richtigem Tipp bekommt der Imposter 1 Punkt, sonst alle anderen je 1 Punkt.</div>
+          </div>
+          <div class="footer-actions">
+            <button class="btn btn-primary btn-block" onclick="submitGuess()">Tipp abgeben</button>
+            <button class="btn btn-secondary btn-block" onclick="state.phase='accuse'; render();">Zurück</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function resultScreen() {
+      return `
+        <div class="screen stack">
+          ${scoreboardHTML()}
+          <div class="hero stack center">
+            <div class="tiny">Rundenergebnis</div>
+            <h2 style="margin:0">${escapeHtml(state.outcomeText)}</h2>
+            <div class="small muted">Gesuchter Begriff: <span class="highlight">${escapeHtml(state.secretWord)}</span>${state.settings.imposterHint ? ` · Hinweis des Imposters: <span class="highlight">${escapeHtml(state.hintWord)}</span>` : ''}</div>
+          </div>
+          <div class="footer-actions">
+            <button class="btn btn-primary btn-block" onclick="startNextRoundKeepSetup()">Nächste Runde</button>
+            <button class="btn btn-secondary btn-block" onclick="state.phase='setup'; render();">Zurück zum Setup</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function render() {
+      roundNo.textContent = state.round;
+      let html = '';
+      switch (state.phase) {
+        case 'setup': html = setupScreen(); break;
+        case 'pass': html = passScreen(); break;
+        case 'reveal': html = revealScreen(state.currentPlayer, false); break;
+        case 'new-word': html = newWordScreen(); break;
+        case 'discussion': html = discussionScreen(); break;
+        case 'review-select': html = reviewSelectScreen(); break;
+        case 'review-pass': html = reviewPassScreen(); break;
+        case 'review-reveal': html = revealScreen(state.reviewIndex, true); break;
+        case 'accuse': html = accuseScreen(); break;
+        case 'guess': html = guessScreen(); break;
+        case 'result': html = resultScreen(); break;
+        default: html = setupScreen();
+      }
+      app.innerHTML = html;
+    }
+
+    render();
+  </script>
+</body>
+</html>
