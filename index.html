@@ -27,10 +27,10 @@
     html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(180deg, #0f172a 0%, #111827 100%); color: var(--text); min-height: 100%; }
     body { padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px; }
     .app { max-width: 760px; margin: 0 auto; padding: 10px 0 30px; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-    .brand { display: flex; align-items: center; gap: 10px; }
-    .logo { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #14b8a6, #0ea5e9); display: grid; place-items: center; font-weight: 900; color: white; box-shadow: var(--shadow); }
-    .title h1 { margin: 0; font-size: 24px; line-height: 1.1; }
+    .topbar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .brand { display: contents; }
+    .title { text-align: center; }
+    .title h1 { margin: 0; font-size: 31px; line-height: 1.1; color: #fdba74; }
     .title p { margin: 3px 0 0; color: var(--muted); font-size: 14px; }
     .screen, .panel { background: rgba(17, 24, 39, 0.94); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; box-shadow: var(--shadow); }
     .screen { padding: 16px; }
@@ -42,6 +42,8 @@
     .small { font-size: 13px; }
     .tiny { font-size: 12px; color: var(--muted); }
     .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(20,184,166,0.12); border: 1px solid rgba(20,184,166,0.35); color: #a7f3d0; font-size: 13px; }
+    .round-pill, .info-btn { width: 96px; justify-content: center; text-align: center; }
+    .round-pill { min-height: 35px; }
     .badge { display: inline-block; padding: 7px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; }
     .easy { background: rgba(34,197,94,0.18); color: #bbf7d0; border: 1px solid rgba(34,197,94,0.35); }
     .medium { background: rgba(245,158,11,0.18); color: #fde68a; border: 1px solid rgba(245,158,11,0.35); }
@@ -56,7 +58,7 @@
     .btn-ghost { background: transparent; color: #cbd5e1; border: 1px dashed rgba(255,255,255,0.16); }
     .btn[disabled] { opacity: .45; cursor: not-allowed; }
     .btn-block { width: 100%; }
-    .info-btn { min-height: 42px; padding: 10px 14px; border-radius: 14px; font-size: 14px; }
+    .info-btn { display:inline-flex; align-items:center; justify-content:center; padding: 8px 12px; border-radius: 999px; background: rgba(20,184,166,0.12); border: 1px solid rgba(20,184,166,0.35); color: #a7f3d0; font-size: 13px; font-weight: 400; min-height: auto; line-height: 1; box-shadow: none; }
     .overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.7); display: grid; align-items: end; padding: 16px 14px calc(env(safe-area-inset-bottom) + 16px); z-index: 50; }
     .modal { max-width: 760px; width: 100%; margin: 0 auto; background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; box-shadow: var(--shadow); padding: 18px; }
     .grid { display: grid; gap: 12px; }
@@ -103,10 +105,10 @@
       <div class="brand">
         <button class="btn btn-secondary info-btn" onclick="toggleInfo(true)">Info</button>
         <div class="title">
-          <h1>Imposter Game</h1>
-</div>
+          <h1>Imposter</h1>
+        </div>
       </div>
-      <div class="pill">Runde <span id="roundNo">1</span></div>
+      <div class="pill round-pill">Runde <span id="roundNo">1</span></div>
     </div>
     <div id="app"></div>
   </div>
@@ -664,7 +666,7 @@
                       <input type="checkbox" ${state.settings.categories.includes(category) ? 'checked' : ''} onchange="toggleCategory('${category.replace(/'/g, "\\'")}')">
                       <span>
                         <strong>${category}</strong><br>
-                        <span class="tiny">30 Begriffe pro Kategorie</span>
+                        
                       </span>
                     </label>
                   `).join("")}
@@ -680,7 +682,7 @@
                   ${['leicht', 'mittel', 'schwer'].map(diff => `
                     <label class="option ${state.settings.difficulty === diff ? 'active' : ''}">
                       <input type="radio" name="difficulty" ${state.settings.difficulty === diff ? 'checked' : ''} onchange="setDifficulty('${diff}')">
-                      <span><strong>${difficultyLabel(diff)}</strong><br><span class="tiny">${diff === 'leicht' ? 'Leichte Begriffe' : diff === 'mittel' ? 'Mittelschwere Begriffe' : 'Schwer zu erratende Begriffe'}</span></span>
+                      <span><strong>${difficultyLabel(diff)}</strong></span>
                     </label>
                   `).join("")}
                 </div>
